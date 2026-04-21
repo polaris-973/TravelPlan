@@ -152,25 +152,25 @@ export function HotelManager({ trip }: Props) {
             style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
             placeholder="如：丽江市古城区新华街"
           />
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+            <div style={{ minWidth: 0 }}>
               <div className="text-[12px] text-muted mb-1">入住 *</div>
               <input
                 type="date"
                 value={form.checkInDate}
                 onChange={(e) => setForm({ ...form, checkInDate: e.target.value })}
-                className="w-full px-2 py-2 rounded-lg text-[12px] outline-none"
-                style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                className="w-full px-2 py-2 rounded-lg outline-none"
+                style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
               />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div className="text-[12px] text-muted mb-1">退房 *</div>
               <input
                 type="date"
                 value={form.checkOutDate}
                 onChange={(e) => setForm({ ...form, checkOutDate: e.target.value })}
-                className="w-full px-2 py-2 rounded-lg text-[12px] outline-none"
-                style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                className="w-full px-2 py-2 rounded-lg outline-none"
+                style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
               />
             </div>
           </div>

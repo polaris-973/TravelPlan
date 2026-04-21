@@ -173,25 +173,26 @@ export function PlanningIntakeSheet({ isOpen, trip, onClose }: Props) {
           <Section title="行程 & 航班" defaultOpen required summary={intake.arrivalAirport.name || undefined}>
             <AirportPicker value={intake.arrivalAirport} onChange={(a: Airport) => patch({ arrivalAirport: a })} />
 
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div>
+            {/* datetime-local needs ~180px min; stack on narrow screens */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+              <div style={{ minWidth: 0 }}>
                 <div className="text-[12px] text-muted mb-1.5">到达时间 <span className="text-accent">*</span></div>
                 <input
                   type="datetime-local"
                   value={intake.arrivalDateTime}
                   onChange={(e) => patch({ arrivalDateTime: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded-xl text-[12px] outline-none"
-                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                  className="w-full px-2.5 py-2 rounded-xl outline-none"
+                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
                 />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div className="text-[12px] text-muted mb-1.5">返程时间 <span className="text-accent">*</span></div>
                 <input
                   type="datetime-local"
                   value={intake.returnDateTime}
                   onChange={(e) => patch({ returnDateTime: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded-xl text-[12px] outline-none"
-                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                  className="w-full px-2.5 py-2 rounded-xl outline-none"
+                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
                 />
               </div>
             </div>
@@ -298,24 +299,24 @@ export function PlanningIntakeSheet({ isOpen, trip, onClose }: Props) {
             />
 
             <div className="grid grid-cols-2 gap-2 mb-3 mt-1">
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div className="text-[12px] text-muted mb-1.5">每日出发时间</div>
                 <input
                   type="time"
                   value={intake.dailyStartTime}
                   onChange={(e) => patch({ dailyStartTime: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded-xl text-[12px] outline-none"
-                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                  className="w-full px-2.5 py-2 rounded-xl outline-none"
+                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
                 />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div className="text-[12px] text-muted mb-1.5">每日结束时间</div>
                 <input
                   type="time"
                   value={intake.dailyEndTime}
                   onChange={(e) => patch({ dailyEndTime: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded-xl text-[12px] outline-none"
-                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)' }}
+                  className="w-full px-2.5 py-2 rounded-xl outline-none"
+                  style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text)', fontSize: 14, minWidth: 0 }}
                 />
               </div>
             </div>
