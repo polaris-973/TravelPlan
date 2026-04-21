@@ -29,12 +29,22 @@ export function HomePage() {
   const [mapLayer, setMapLayer] = useState<'standard' | 'satellite'>('standard');
 
   const trip = useTripStore((s) => s.getActiveTrip());
-  const { addPlaceToDay, removePlace, updatePlace, undoDelete, addDay, setDayWeather, addNote, removeNote, updateNote } = useTripStore();
+  const { addPlaceToDay, removePlace, updatePlace, undoDelete, addDay, setDayWeather, addNote, removeNote, updateNote, addHotel, removeHotel } = useTripStore();
   const config = useSettingsStore((s) => s.config);
   const { toasts, show: showToast, dismiss } = useToast();
 
   const allPlaces = trip?.days.flatMap((d) => d.places) ?? [];
   const currentDayId = activeDayId ?? trip?.days[0]?.id ?? null;
+
+  // ── Arrival airport + leg to Day 1 first stop (from active plan) ──
+  const activePlan = trip?.savedPlans?.find((p) => p.id === trip?.activePlanId);
+  const arrivalAirport = activePlan?.intake?.arrivalAirport;
+  const day1FirstStop = (() => {
+    if (!trip || trip.days.length === 0) return null;
+    const firstDay = trip.days[0];
+    if (firstDay.places.length === 0) return null;
+    return firstDay.places[0];
+  })();
 
   // ── Map display: filter places to the active day and label them accordingly ──
   const { mapPlaces, placeLabels, dayGroups } = (() => {
@@ -141,6 +151,13 @@ export function HomePage() {
           mapLayer={mapLayer}
           placeLabels={placeLabels}
           dayGroups={dayGroups}
+          arrivalAirport={arrivalAirport?.location ? arrivalAirport : undefined}
+          airportConnectsTo={
+            // Only draw the connecting leg if day-1 first stop is in the currently visible map places
+            arrivalAirport?.location && day1FirstStop && mapPlaces.some((p) => p.id === day1FirstStop.id)
+              ? { location: day1FirstStop.location, name: day1FirstStop.name }
+              : undefined
+          }
         />
       </div>
 
@@ -284,6 +301,8 @@ export function HomePage() {
                           key={day.id}
                           day={day}
                           dayIndex={trip.days.indexOf(day)}
+                          tripDaysCount={trip.days.length}
+                          hotels={trip.hotels}
                           onPlaceDelete={(placeId) => {
                             const p = day.places.find((pl) => pl.id === placeId);
                             handleDeletePlace(day.id, placeId, p?.name ?? '');
@@ -292,6 +311,8 @@ export function HomePage() {
                           onPlaceDurationChange={(placeId, minutes) => updatePlace(trip.id, day.id, placeId, { durationMinutes: minutes })}
                           onAddPlace={() => setActiveDayId(day.id)}
                           onWeatherFetched={(weather) => setDayWeather(trip.id, day.id, weather)}
+                          onAddHotel={(hotel) => addHotel(trip.id, hotel)}
+                          onRemoveHotel={(hotelId) => removeHotel(trip.id, hotelId)}
                         />
                       ))}
                     <HotelManager trip={trip} />

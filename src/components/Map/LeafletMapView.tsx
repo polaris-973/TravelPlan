@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 import type { Map as LeafletMap } from 'leaflet';
-import type { PlaceVisit, Hotel, Location } from '../../types/trip';
+import type { PlaceVisit, Hotel, Location, Airport } from '../../types/trip';
 
 interface LeafletMapViewProps {
   places: PlaceVisit[];
@@ -13,6 +13,10 @@ interface LeafletMapViewProps {
   placeLabels?: Record<string, string>;
   /** If provided, draw per-day dashed path in separate colour groups. Each entry: day's ordered place IDs. */
   dayGroups?: Array<{ dayIndex: number; placeIds: string[] }>;
+  /** Arrival airport marker (optional). Rendered in purple with ✈️ icon. */
+  arrivalAirport?: Airport;
+  /** If set, draw a dashed line from arrival airport to this location with a distance label. */
+  airportConnectsTo?: { location: Location; name?: string };
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -40,13 +44,25 @@ function formatDist(km: number): string {
 // Per-day colours (cycles) for multi-day overview lines
 const DAY_COLORS = ['#3A7A8C', '#C85A3E', '#8BA888', '#D4A574', '#6B7FA8', '#9E7EB8', '#D77A7A'];
 
-export function LeafletMapView({ places, hotels = [], onMarkerClick, selectedPlaceId, mapLayer = 'standard', placeLabels, dayGroups }: LeafletMapViewProps) {
+export function LeafletMapView({
+  places,
+  hotels = [],
+  onMarkerClick,
+  selectedPlaceId,
+  mapLayer = 'standard',
+  placeLabels,
+  dayGroups,
+  arrivalAirport,
+  airportConnectsTo,
+}: LeafletMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersRef = useRef<Map<string, any>>(new Map());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hotelMarkersRef = useRef<Map<string, any>>(new Map());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const airportRef = useRef<{ marker: any; line: any; label: any } | null>(null);
 
   // Init map once
   useEffect(() => {
@@ -249,6 +265,59 @@ export function LeafletMapView({ places, hotels = [], onMarkerClick, selectedPla
     });
     return () => { active = false; };
   }, [hotels]);
+
+  // Sync arrival airport marker + connecting leg to first stop
+  useEffect(() => {
+    if (!mapRef.current) return;
+    let active = true;
+
+    import('leaflet').then((L) => {
+      if (!active || !mapRef.current) return;
+      const map = mapRef.current;
+
+      // Always clear previous airport layers first
+      if (airportRef.current) {
+        airportRef.current.marker?.remove();
+        airportRef.current.line?.remove();
+        airportRef.current.label?.remove();
+        airportRef.current = null;
+      }
+
+      if (!arrivalAirport?.location) return;
+
+      const loc = arrivalAirport.location;
+      const airportHtml = `<div style="width:44px;height:44px;background:linear-gradient(135deg,#8E7DBE,#6B5A9E);border:2.5px solid white;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(107,90,158,0.45);position:relative;">
+        <span style="font-size:18px;line-height:1;">✈️</span>
+        ${arrivalAirport.code ? `<span style="font-size:8px;font-weight:700;color:#fff;margin-top:1px;letter-spacing:0.5px;">${arrivalAirport.code}</span>` : ''}
+      </div>`;
+      const airportIcon = L.divIcon({ html: airportHtml, className: '', iconSize: [44, 44], iconAnchor: [22, 22] });
+      const marker = L.marker([loc.lat, loc.lng], { icon: airportIcon, zIndexOffset: 700 })
+        .addTo(map)
+        .bindTooltip(arrivalAirport.name || '到达机场', { direction: 'top', offset: [0, -10] });
+
+      // If a connection target is given, draw the arrival leg
+      let line, label;
+      if (airportConnectsTo) {
+        const tgt = airportConnectsTo.location;
+        line = L.polyline(
+          [[loc.lat, loc.lng], [tgt.lat, tgt.lng]],
+          { color: '#8E7DBE', weight: 2.8, opacity: 0.85, dashArray: '2,6' },
+        ).addTo(map);
+
+        const km = haversineKm(loc, tgt);
+        const midLat = (loc.lat + tgt.lat) / 2;
+        const midLng = (loc.lng + tgt.lng) / 2;
+        const legLabel = `✈️→${formatDist(km)}${airportConnectsTo.name ? ' · ' + airportConnectsTo.name : ''}`;
+        const labelHtml = `<div style="transform:translate(-50%,-50%);background:rgba(142,125,190,0.95);color:white;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:600;white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,0.2);pointer-events:none;">${legLabel}</div>`;
+        const labelIcon = L.divIcon({ html: labelHtml, className: '', iconSize: [0, 0], iconAnchor: [0, 0] });
+        label = L.marker([midLat, midLng], { icon: labelIcon, interactive: false }).addTo(map);
+      }
+
+      airportRef.current = { marker, line, label };
+    });
+
+    return () => { active = false; };
+  }, [arrivalAirport, airportConnectsTo]);
 
   return (
     <>
