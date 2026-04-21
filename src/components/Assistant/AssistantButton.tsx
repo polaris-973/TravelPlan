@@ -48,9 +48,9 @@ export function AssistantButton() {
     hasMoved.current = true;
     setDragging(true);
 
-    // right increases as we move left; bottom increases as we move up
+    // `right` grows as finger moves LEFT (dx < 0); `bottom` grows as finger moves UP (dy < 0)
     const newRight = clamp(startPos.current.right - dx, 8, window.innerWidth - FAB_SIZE - 8);
-    const newBottom = clamp(startPos.current.bottom + dy, 8, window.innerHeight - FAB_SIZE - 8);
+    const newBottom = clamp(startPos.current.bottom - dy, 8, window.innerHeight - FAB_SIZE - 8);
     setPos({ right: newRight, bottom: newBottom });
   }, []);
 

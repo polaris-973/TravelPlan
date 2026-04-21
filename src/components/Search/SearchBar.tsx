@@ -8,7 +8,7 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export function SearchBar({ onSelectPlace, placeholder = '搜索云南的景点、美食、酒店…' }: SearchBarProps) {
+export function SearchBar({ onSelectPlace, placeholder = '搜索地点' }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PoiResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,15 +71,15 @@ export function SearchBar({ onSelectPlace, placeholder = '搜索云南的景点�
   };
 
   return (
-    <div className="relative" style={{ zIndex: 20 }}>
+    <div className="relative" style={{ zIndex: 20, minWidth: 0 }}>
       {/* Input */}
       <div
-        className="flex items-center gap-2 px-4 h-11 rounded-2xl glass-light"
-        style={{ boxShadow: 'var(--shadow-md)' }}
+        className="flex items-center gap-2 px-3 h-10 rounded-2xl glass-light"
+        style={{ boxShadow: 'var(--shadow-md)', minWidth: 0 }}
       >
         {loading
-          ? <div className="w-4 h-4 rounded-full border-2 border-transparent border-t-primary animate-spin-slow" />
-          : <Search size={16} strokeWidth={1.5} style={{ color: 'var(--color-text-secondary)', flexShrink: 0 }} />
+          ? <div className="w-4 h-4 rounded-full border-2 border-transparent border-t-primary animate-spin-slow flex-shrink-0" />
+          : <Search size={15} strokeWidth={1.5} style={{ color: 'var(--color-text-secondary)', flexShrink: 0 }} />
         }
         <input
           ref={inputRef}
@@ -88,8 +88,8 @@ export function SearchBar({ onSelectPlace, placeholder = '搜索云南的景点�
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 150)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-[15px] outline-none placeholder-subtle"
-          style={{ color: 'var(--color-text)' }}
+          className="bg-transparent outline-none placeholder-subtle"
+          style={{ color: 'var(--color-text)', flex: '1 1 0%', minWidth: 0, fontSize: 15 }}
         />
         {query && (
           <button className="tap" onClick={clear}>

@@ -156,24 +156,36 @@ export function HomePage() {
       )}
 
       {/* ── Top floating controls ── */}
-      <div style={{ position: 'absolute', left: 16, right: 16, zIndex: 20, top: 'calc(var(--safe-top) + 12px)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ flex: 1 }}><SearchBar onSelectPlace={handleSelectPOI} /></div>
+      <div style={{
+        position: 'absolute',
+        left: 'max(12px, env(safe-area-inset-left))',
+        right: 'max(12px, env(safe-area-inset-right))',
+        zIndex: 20,
+        top: 'calc(var(--safe-top) + 10px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          {/* min-width:0 is critical — flex items with input children refuse to shrink without it */}
+          <div style={{ flex: '1 1 0%', minWidth: 0 }}>
+            <SearchBar onSelectPlace={handleSelectPOI} />
+          </div>
           {trip && (
             <button
               className="tap glass-light"
               title="AI 智能规划"
-              style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0, background: 'linear-gradient(135deg,rgba(58,122,140,0.15),rgba(44,95,107,0.15))', border: '1px solid rgba(58,122,140,0.2)' }}
+              style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0, background: 'linear-gradient(135deg,rgba(58,122,140,0.15),rgba(44,95,107,0.15))', border: '1px solid rgba(58,122,140,0.2)' }}
               onClick={() => setShowPlanning(true)}
             >
-              <Sparkles size={18} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
+              <Sparkles size={17} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
             </button>
           )}
-          <button className="tap glass-light" style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0 }} onClick={() => setShowSettings(true)}>
-            <Settings size={18} strokeWidth={1.5} style={{ color: 'var(--color-text)' }} />
+          <button className="tap glass-light" style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0 }} onClick={() => setShowSettings(true)}>
+            <Settings size={17} strokeWidth={1.5} style={{ color: 'var(--color-text)' }} />
           </button>
-          <button className="tap glass-light" title="切换图层" style={{ width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0 }} onClick={() => setMapLayer(mapLayer === 'standard' ? 'satellite' : 'standard')}>
-            <Layers size={18} strokeWidth={1.5} style={{ color: 'var(--color-text)' }} />
+          <button className="tap glass-light" title="切换图层" style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-md)', flexShrink: 0 }} onClick={() => setMapLayer(mapLayer === 'standard' ? 'satellite' : 'standard')}>
+            <Layers size={17} strokeWidth={1.5} style={{ color: 'var(--color-text)' }} />
           </button>
         </div>
 
