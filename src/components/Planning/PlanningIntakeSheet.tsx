@@ -7,6 +7,7 @@ import { X, Sparkles, Check, RotateCcw, AlertCircle } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { usePlanningStore } from '../../store/planningStore';
 import { useTripStore } from '../../store/tripStore';
+import { PlanningProgressLog } from './PlanningProgressLog';
 import type {
   Trip, TripIntake, PlacePlanInput, Interest, TripPace, TransportMode, Budget, Airport,
 } from '../../types/trip';
@@ -407,34 +408,14 @@ export function PlanningIntakeSheet({ isOpen, trip, onClose }: Props) {
         }}
       >
         {header('AI 正在规划…')}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-4">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center relative"
-            style={{ background: 'linear-gradient(135deg,rgba(58,122,140,0.15),rgba(44,95,107,0.15))' }}
-          >
-            <Sparkles size={36} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
-            <div
-              className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin-slow"
-              style={{ borderTopColor: 'var(--color-primary)' }}
-            />
-          </div>
-          <div className="text-center">
-            <div className="text-[15px] font-semibold mb-1" style={{ color: 'var(--color-text)' }}>
-              {progress.message || '请稍候…'}
-            </div>
-            <div className="text-[11px] text-muted">已调用 {progress.toolCallCount} 次工具</div>
-            {currentError && (
-              <div className="text-[12px] text-accent mt-2">{currentError}</div>
-            )}
-          </div>
-          <button
-            className="tap mt-4 px-6 py-2.5 rounded-xl text-[13px] font-medium"
-            style={{ backgroundColor: 'var(--color-divider)', color: 'var(--color-text-secondary)' }}
-            onClick={handleCancel}
-          >
-            取消生成
-          </button>
-        </div>
+        <PlanningProgressLog
+          progressMessage={progress.message}
+          toolCallCount={progress.toolCallCount}
+          isGenerating={isGenerating}
+          onCancel={handleCancel}
+          onBackToForm={() => setStep('intake')}
+          error={currentError}
+        />
       </div>
     );
   }

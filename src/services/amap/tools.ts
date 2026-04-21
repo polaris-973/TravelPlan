@@ -1,5 +1,6 @@
 import type { ToolDefinition } from '../../types/llm';
 import { searchPOI, getWeather, geocode } from './loader';
+import { fetchJson } from '../http';
 import type { LLMConfig } from '../../types/llm';
 
 export function getAmapTools(): ToolDefinition[] {
@@ -136,21 +137,8 @@ export function getPlanningTools(): ToolDefinition[] {
         },
       },
     },
-    {
-      type: 'function',
-      function: {
-        name: 'web_search',
-        description: '搜索景点最新信息，包括临时关闭、特殊开放时间、预约要求等',
-        parameters: {
-          type: 'object',
-          properties: {
-            query: { type: 'string', description: '搜索关键词' },
-            max_results: { type: 'number', description: '返回结果数，默认3', default: 3 },
-          },
-          required: ['query'],
-        },
-      },
-    },
+    // web_search removed — always returned empty results, wasted a tool-call round-trip.
+    // LLM should use its training knowledge + amap_place_detail for live data.
     {
       type: 'function',
       function: {
@@ -271,13 +259,14 @@ export async function executeAmapTool(
         const typeCode = mode === 'walking' ? '3' : '1';
         const originsParam = origins.map((o) => o.split('|')[0]).join(';');
         const results: unknown[] = [];
+        const failedDests: string[] = [];
         for (const dest of destinations) {
           const destCoord = dest.split('|')[0];
           const destName = dest.split('|')[1] ?? destCoord;
           try {
             const url = `https://restapi.amap.com/v3/distance?origins=${encodeURIComponent(originsParam)}&destination=${encodeURIComponent(destCoord)}&type=${typeCode}&key=${apiKey}`;
-            const res = await fetch(url);
-            const data = await res.json();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data = await fetchJson<any>(url, undefined, { timeoutMs: 12000, retries: 2 });
             if (data.status === '1' && data.results) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               data.results.forEach((r: any, i: number) => {
@@ -294,17 +283,25 @@ export async function executeAmapTool(
                   mode,
                 });
               });
+            } else {
+              failedDests.push(destName);
             }
-          } catch { /* skip failed segment */ }
+          } catch {
+            failedDests.push(destName);
+          }
         }
-        return JSON.stringify({ matrix: results, mode });
+        return JSON.stringify({
+          matrix: results,
+          mode,
+          ...(failedDests.length ? { partial: true, failedDestinations: failedDests } : {}),
+        });
       }
 
       case 'amap_place_detail': {
         const poiId = args.poi_id as string;
         const url = `https://restapi.amap.com/v3/place/detail?id=${poiId}&key=${apiKey}&output=json`;
-        const res = await fetch(url);
-        const data = await res.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await fetchJson<any>(url, undefined, { timeoutMs: 10000, retries: 2 });
         if (data.status !== '1' || !data.pois?.[0]) return '未找到景点详情';
         const poi = data.pois[0];
         return JSON.stringify({

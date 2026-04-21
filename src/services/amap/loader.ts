@@ -1,3 +1,5 @@
+import { fetchJson } from '../http';
+
 declare global {
   interface Window {
     AMap: AMapType;
@@ -33,8 +35,8 @@ export function loadAMap(apiKey: string, version = '2.0'): Promise<AMapType> {
 export async function geocode(apiKey: string, address: string): Promise<{ lng: number; lat: number } | null> {
   const url = `https://restapi.amap.com/v3/geocode/geo?address=${encodeURIComponent(address)}&key=${apiKey}&output=json`;
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await fetchJson<any>(url, undefined, { timeoutMs: 10000, retries: 2 });
     if (data.status === '1' && data.geocodes?.length > 0) {
       const [lng, lat] = data.geocodes[0].location.split(',').map(Number);
       return { lng, lat };
@@ -48,8 +50,8 @@ export async function geocode(apiKey: string, address: string): Promise<{ lng: n
 export async function searchPOI(apiKey: string, keywords: string, city = '云南'): Promise<PoiResult[]> {
   const url = `https://restapi.amap.com/v3/place/text?keywords=${encodeURIComponent(keywords)}&city=${encodeURIComponent(city)}&key=${apiKey}&output=json&offset=20`;
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await fetchJson<any>(url, undefined, { timeoutMs: 10000, retries: 2 });
     if (data.status === '1' && data.pois) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return data.pois.map((p: any) => ({
@@ -82,8 +84,8 @@ export interface PoiResult {
 export async function getWeather(apiKey: string, adcode: string): Promise<WeatherResult | null> {
   const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${adcode}&key=${apiKey}&extensions=all&output=json`;
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await fetchJson<any>(url, undefined, { timeoutMs: 10000, retries: 2 });
     if (data.status === '1' && data.forecasts?.length > 0) {
       return { forecasts: data.forecasts[0].casts };
     }
