@@ -25,11 +25,12 @@
     <title>滇途 — 云南旅游规划</title>
 
     <style>
-      /* Prevent overscroll bounce, double-tap zoom, text selection on iOS */
+      /* Prevent double-tap zoom, tap highlight flashes. Keep text selection enabled
+         globally — disabling it breaks scroll propagation on some iOS versions. */
       html { -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
-      body { overscroll-behavior: none; -webkit-user-select: none; user-select: none;
-             -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-      input, textarea { -webkit-user-select: text; user-select: text; }
+      body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+      /* Only drag handles / interactive non-text buttons should disable selection */
+      .no-select { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
     </style>
   </head>
   <body>

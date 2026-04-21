@@ -82,8 +82,8 @@ export function PersistentSheet({
     >
       {/* Drag handle */}
       <div
-        className="flex-shrink-0 flex items-center justify-center pt-2.5 pb-1 cursor-grab active:cursor-grabbing"
-        style={{ minHeight: 28 }}
+        className="flex-shrink-0 flex items-center justify-center pt-2.5 pb-1 cursor-grab active:cursor-grabbing no-select"
+        style={{ minHeight: 28, touchAction: 'none' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -95,8 +95,8 @@ export function PersistentSheet({
         />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Content — min-height:0 is essential for iOS nested-scroll inside flex */}
+      <div className="flex-1 overflow-hidden flex-min-0">
         {children(expanded)}
       </div>
     </div>
@@ -191,14 +191,15 @@ export function ModalSheet({
         }}
       >
         <div
-          className="flex-shrink-0 flex items-center justify-center pt-3 pb-1 cursor-grab"
+          className="flex-shrink-0 flex items-center justify-center pt-3 pb-1 cursor-grab no-select"
+          style={{ touchAction: 'none' }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
           <div className="w-9 h-1 rounded-full" style={{ backgroundColor: 'var(--color-text-tertiary)', opacity: 0.4 }} />
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden flex-min-0">
           {children}
         </div>
       </div>

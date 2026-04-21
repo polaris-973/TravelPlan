@@ -28,16 +28,20 @@ export function AssistantButton() {
   const startPos = useRef(DEFAULT_POS);
   const hasMoved = useRef(false);
 
+  const pointerActive = useRef(false);
+
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     startPointer.current = { x: e.clientX, y: e.clientY };
     startPos.current = pos;
     hasMoved.current = false;
+    pointerActive.current = true;
     setDragging(false);
   }, [pos]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!(e.buttons & 1)) return;
+    // iOS touch events don't set `e.buttons`, so gate on our own flag set in pointerdown.
+    if (!pointerActive.current) return;
     const dx = e.clientX - startPointer.current.x;
     const dy = e.clientY - startPointer.current.y;
     if (!hasMoved.current && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
@@ -51,6 +55,7 @@ export function AssistantButton() {
   }, []);
 
   const handlePointerUp = useCallback(() => {
+    pointerActive.current = false;
     if (hasMoved.current) {
       savePos(pos);
     } else {
@@ -59,6 +64,11 @@ export function AssistantButton() {
     }
     setDragging(false);
   }, [pos]);
+
+  const handlePointerCancel = useCallback(() => {
+    pointerActive.current = false;
+    setDragging(false);
+  }, []);
 
   return (
     <>
@@ -82,6 +92,7 @@ export function AssistantButton() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
         >
           <Sparkles
             size={22}

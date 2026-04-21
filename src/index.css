@@ -44,11 +44,18 @@
   * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
   html, body, #root {
-    height: 100%; width: 100%; overflow: hidden;
+    /* dvh works around iOS Safari's 100vh bug (viewport includes hidden toolbar) */
+    height: 100dvh;
+    width: 100%;
+    overflow: hidden;
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: "PingFang SC", -apple-system, "Helvetica Neue", sans-serif;
     margin: 0; padding: 0;
+  }
+  /* Fallback for browsers that don't support dvh */
+  @supports not (height: 100dvh) {
+    html, body, #root { height: 100%; min-height: -webkit-fill-available; }
   }
 }
 
@@ -168,6 +175,36 @@
   .scroll-ios {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    /* Tell iOS this is a vertical scroll surface so it doesn't eat touches */
+    touch-action: pan-y;
+  }
+
+  /* Horizontal scrolling variant for day tabs / plan selectors */
+  .scroll-ios-x {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-x;
+  }
+
+  /* Use on flex parents whose direct child has overflow:auto to fix iOS scrolling */
+  .flex-min-0 { min-height: 0; min-width: 0; }
+
+  /* iOS Safari auto-zooms on inputs with font-size < 16px. Force 16px on mobile. */
+  @media (max-width: 640px) {
+    input[type="text"],
+    input[type="password"],
+    input[type="search"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
   }
 
   .safe-top { padding-top: var(--safe-top); }
