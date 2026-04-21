@@ -41,7 +41,7 @@ function formatDuration(ms?: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function EventRow({ ev }: { ev: PlanEvent }) {
+function EventRow({ ev, isLive }: { ev: PlanEvent; isLive?: boolean }) {
   const timestamp = formatTime(ev.at);
 
   if (ev.kind === 'info') {
@@ -78,17 +78,26 @@ function EventRow({ ev }: { ev: PlanEvent }) {
   if (ev.kind === 'text') {
     return (
       <div className="flex items-start gap-2 py-1.5">
-        <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
+        <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5 relative">
           <MessageSquare size={11} strokeWidth={1.5} style={{ color: 'var(--color-primary)' }} />
+          {isLive && (
+            <div
+              className="absolute -right-0.5 -bottom-0.5 w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ backgroundColor: 'var(--color-primary)' }}
+            />
+          )}
         </div>
         <div
           className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg"
           style={{ backgroundColor: 'rgba(58,122,140,0.06)', borderLeft: '2px solid var(--color-primary)' }}
         >
-          <div className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
+          <div className="text-[12px] leading-relaxed" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'pre-wrap' }}>
             {ev.text}
+            {isLive && <span className="inline-block ml-0.5 w-1.5 h-3 bg-primary align-middle animate-pulse" />}
           </div>
-          <div className="text-[10px] text-muted mt-1">{timestamp} · AI 思考</div>
+          <div className="text-[10px] text-muted mt-1">
+            {timestamp} · AI 思考{isLive ? '中…' : ''}
+          </div>
         </div>
       </div>
     );
@@ -232,9 +241,12 @@ export function PlanningProgressLog({
           </div>
         ) : (
           <div>
-            {events.map((ev) => (
-              <EventRow key={ev.id} ev={ev} />
-            ))}
+            {events.map((ev, i) => {
+              // A text event is "live" if it's the latest event and generation is still ongoing
+              const isLatest = i === events.length - 1;
+              const isLive = isGenerating && isLatest && ev.kind === 'text';
+              return <EventRow key={ev.id} ev={ev} isLive={isLive} />;
+            })}
           </div>
         )}
       </div>

@@ -167,6 +167,13 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
     return ev;
   };
 
+  /** Append text to an existing event (used to stream LLM reasoning live). */
+  const appendToEvent = (id: string, chunk: string) => {
+    set((s) => ({
+      events: s.events.map((e) => e.id === id ? { ...e, text: (e.text ?? '') + chunk } : e),
+    }));
+  };
+
   return {
     isGenerating: false,
     progress: { phase: 'idle', toolCallCount: 0, message: '' },
@@ -248,7 +255,8 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
         let assistantText = '';
         const toolCallBuffers: Record<string, { name: string; args: string }> = {};
         const pendingEnds: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
-        let textEventEmitted = false;
+        // Stream the LLM's reasoning token-by-token into a single live event.
+        let liveTextEventId: string | null = null;
 
         try {
           for await (const chunk of stream) {
@@ -256,7 +264,14 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
 
             if (chunk.type === 'text' && chunk.text) {
               assistantText += chunk.text;
+              if (!liveTextEventId) {
+                liveTextEventId = pushEvent('text', { text: chunk.text }).id;
+              } else {
+                appendToEvent(liveTextEventId, chunk.text);
+              }
             } else if (chunk.type === 'tool_call_start' && chunk.toolCallId) {
+              // Seal the current text event when a tool call begins
+              liveTextEventId = null;
               toolCallBuffers[chunk.toolCallId] = { name: chunk.toolName ?? '', args: '' };
               const msg = TOOL_PROGRESS_MESSAGES[chunk.toolName ?? ''] ?? `调用 ${chunk.toolName}…`;
               set((s) => ({ progress: { ...s.progress, currentTool: chunk.toolName, message: msg } }));
@@ -281,14 +296,8 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
 
         if (controller.signal.aborted) break;
 
-        // Emit any free-text reasoning we captured
-        const trimmedText = assistantText.trim();
-        if (trimmedText && !textEventEmitted) {
-          pushEvent('text', { text: trimmedText });
-        }
-
         if (pendingEnds.length === 0) {
-          if (!trimmedText) throw new Error('LLM 未生成任何内容，请重试');
+          if (!assistantText.trim()) throw new Error('LLM 未生成任何内容，请重试');
           throw new Error('LLM 未调用 propose_smart_plan 工具，请重新规划');
         }
 
@@ -462,13 +471,20 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
         let assistantText = '';
         const toolCallBuffers: Record<string, { name: string; args: string }> = {};
         const pendingEnds: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
+        let liveTextEventId: string | null = null;
 
         try {
           for await (const chunk of stream) {
             if (controller.signal.aborted) { continueLoop = false; break; }
             if (chunk.type === 'text' && chunk.text) {
               assistantText += chunk.text;
+              if (!liveTextEventId) {
+                liveTextEventId = pushEvent('text', { text: chunk.text }).id;
+              } else {
+                appendToEvent(liveTextEventId, chunk.text);
+              }
             } else if (chunk.type === 'tool_call_start' && chunk.toolCallId) {
+              liveTextEventId = null;
               toolCallBuffers[chunk.toolCallId] = { name: chunk.toolName ?? '', args: '' };
               const msg = TOOL_PROGRESS_MESSAGES[chunk.toolName ?? ''] ?? `调用 ${chunk.toolName}…`;
               set((s) => ({ progress: { ...s.progress, currentTool: chunk.toolName, message: msg } }));
@@ -491,8 +507,6 @@ export const usePlanningStore = create<PlanningState>((set, get) => {
         }
 
         if (controller.signal.aborted) break;
-
-        if (assistantText.trim()) pushEvent('text', { text: assistantText.trim() });
 
         if (pendingEnds.length === 0) {
           if (!assistantText.trim()) throw new Error('LLM 未生成任何内容，请重试');
