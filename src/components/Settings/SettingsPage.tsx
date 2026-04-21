@@ -65,7 +65,10 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-app">
+    <div
+      className="flex flex-col bg-app flex-min-0"
+      style={{ height: '100dvh', maxHeight: '100dvh' }}
+    >
       {/* Header */}
       <div className="glass-light flex items-center gap-3 px-4 py-3 flex-shrink-0"
         style={{ paddingTop: 'calc(var(--safe-top) + 12px)', borderBottom: '1px solid var(--color-divider)' }}>
@@ -75,7 +78,10 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
         <h1 className="text-[17px] font-semibold" style={{ color: 'var(--color-text)' }}>设置</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto scroll-ios px-4 py-4 space-y-5">
+      <div
+        className="flex-1 overflow-y-auto scroll-ios flex-min-0 px-4 py-4 space-y-5"
+        style={{ WebkitOverflowScrolling: 'touch', paddingBottom: 'calc(var(--safe-bottom) + 32px)' }}
+      >
 
         {/* Amap config */}
         <section>
@@ -85,7 +91,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
               <Map size={18} strokeWidth={1.5} className="text-primary" />
               <span className="text-[15px] font-semibold" style={{ color: 'var(--color-text)' }}>高德地图 API Key</span>
             </div>
-            <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)' }}>
+            <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)', minWidth: 0 }}>
               <input
                 type={showAmapKey ? 'text' : 'password'}
                 value={amapKey}
@@ -94,8 +100,8 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
                   setAmapConfig(config.amapMcpEndpoint ?? '', e.target.value);
                 }}
                 placeholder="填入高德地图 Web API Key"
-                className="flex-1 bg-transparent text-[13px] outline-none"
-                style={{ color: 'var(--color-text)' }}
+                className="bg-transparent text-[13px] outline-none"
+                style={{ color: 'var(--color-text)', flex: '1 1 0%', minWidth: 0 }}
               />
               <button className="tap" onClick={() => setShowAmapKey(!showAmapKey)}>
                 {showAmapKey
@@ -119,14 +125,14 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
                 <CloudSun size={18} strokeWidth={1.5} className="text-primary" />
                 <span className="text-[15px] font-semibold" style={{ color: 'var(--color-text)' }}>和风天气 API Key</span>
               </div>
-              <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)' }}>
+              <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)', minWidth: 0 }}>
                 <input
                   type={showQKey ? 'text' : 'password'}
                   value={qKey}
                   onChange={(e) => { setQKey(e.target.value); setQWeatherKey(e.target.value); }}
                   placeholder="填入 QWeather API Key"
-                  className="flex-1 bg-transparent text-[13px] outline-none"
-                  style={{ color: 'var(--color-text)' }}
+                  className="bg-transparent text-[13px] outline-none"
+                  style={{ color: 'var(--color-text)', flex: '1 1 0%', minWidth: 0 }}
                 />
                 <button className="tap" onClick={() => setShowQKey(!showQKey)}>
                   {showQKey

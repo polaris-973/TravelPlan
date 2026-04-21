@@ -89,14 +89,14 @@ export function LLMProviderCard({
             {/* API Key */}
             <div>
               <label className="text-[12px] font-medium text-muted block mb-1.5">API Key</label>
-              <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)' }}>
+              <div className="flex items-center gap-2 px-3 h-10 rounded-xl" style={{ backgroundColor: 'var(--color-divider)', minWidth: 0 }}>
                 <input
                   type={showKey ? 'text' : 'password'}
                   value={apiKey}
                   onChange={(e) => onKeyChange(e.target.value)}
                   placeholder={`填入 ${info.name} API Key`}
-                  className="flex-1 bg-transparent text-[13px] outline-none"
-                  style={{ color: 'var(--color-text)' }}
+                  className="bg-transparent text-[13px] outline-none"
+                  style={{ color: 'var(--color-text)', flex: '1 1 0%', minWidth: 0 }}
                 />
                 <button className="tap" onClick={() => setShowKey(!showKey)}>
                   {showKey
