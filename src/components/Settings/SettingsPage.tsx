@@ -65,13 +65,33 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
   };
 
   return (
+    /*
+     * iOS-safe scroll pattern:
+     *   outer: position:fixed inset:0, overflow-y:auto (single scroll surface)
+     *   header: position:sticky top:0, sits inside the same scroll container
+     * This avoids all flex-height-math pitfalls on iPhone Safari.
+     */
     <div
-      className="flex flex-col bg-app flex-min-0"
-      style={{ height: '100dvh', maxHeight: '100dvh' }}
+      className="scroll-ios bg-app"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+      }}
     >
-      {/* Header */}
-      <div className="glass-light flex items-center gap-3 px-4 py-3 flex-shrink-0"
-        style={{ paddingTop: 'calc(var(--safe-top) + 12px)', borderBottom: '1px solid var(--color-divider)' }}>
+      {/* Sticky Header */}
+      <div
+        className="glass-light flex items-center gap-3 px-4 py-3"
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          paddingTop: 'calc(var(--safe-top) + 12px)',
+          borderBottom: '1px solid var(--color-divider)',
+        }}
+      >
         <button className="tap w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-divider)' }} onClick={onBack}>
           <ChevronLeft size={18} strokeWidth={2} style={{ color: 'var(--color-text)' }} />
         </button>
@@ -79,8 +99,8 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
       </div>
 
       <div
-        className="flex-1 overflow-y-auto scroll-ios flex-min-0 px-4 py-4 space-y-5"
-        style={{ WebkitOverflowScrolling: 'touch', paddingBottom: 'calc(var(--safe-bottom) + 32px)' }}
+        className="px-4 py-4 space-y-5"
+        style={{ paddingBottom: 'calc(var(--safe-bottom) + 40px)' }}
       >
 
         {/* Amap config */}

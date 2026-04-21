@@ -28,7 +28,13 @@ export function createLLMClient(config: Partial<LLMConfig>): LLMClient {
 }
 
 export const PROVIDER_DEFAULTS = {
-  zhipu: { model: 'glm-4-plus', name: '智谱 AI', models: ['glm-4-plus', 'glm-4-air', 'glm-4-flash'] },
+  zhipu: {
+    // 'glm-4.5' is Zhipu's current flagship (released 2025, surpasses GLM-4-Plus).
+    // If you have access to newer models like glm-4.6 / glm-5 / glm-5.1, pick from list.
+    model: 'glm-4.5',
+    name: '智谱 AI',
+    models: ['glm-4.6', 'glm-4.5', 'glm-4.5-air', 'glm-4-plus', 'glm-4-air', 'glm-4-flash'],
+  },
   deepseek: { model: 'deepseek-chat', name: 'DeepSeek', models: ['deepseek-chat', 'deepseek-reasoner'] },
   anthropic: { model: 'claude-sonnet-4-20250514', name: 'Anthropic Claude', models: ['claude-sonnet-4-20250514', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'] },
 } as const;

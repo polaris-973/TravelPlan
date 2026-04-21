@@ -5,7 +5,7 @@ export class ZhipuClient implements LLMClient {
   private client: OpenAI;
   private model: string;
 
-  constructor(apiKey: string, model = 'glm-4-plus') {
+  constructor(apiKey: string, model = 'glm-4.5') {
     this.model = model;
     this.client = new OpenAI({
       apiKey,
